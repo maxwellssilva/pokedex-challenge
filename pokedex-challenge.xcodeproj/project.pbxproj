@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		821E60112DE200AD00716A80 /* pokedex-challenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "pokedex-challenge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		821E60112DE200AD00716A80 /* pokedex-challenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "pokedex-challenge.app"; path = "/Users/maxwell.silva/Desktop/Geral/Study/pokedex-challenge/build/Debug-iphoneos/pokedex-challenge.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,16 +46,7 @@
 			isa = PBXGroup;
 			children = (
 				821E60132DE200AD00716A80 /* pokedex-challenge */,
-				821E60122DE200AD00716A80 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		821E60122DE200AD00716A80 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				821E60112DE200AD00716A80 /* pokedex-challenge.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,7 +99,7 @@
 			mainGroup = 821E60082DE200AD00716A80;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 821E60122DE200AD00716A80 /* Products */;
+			productRefGroup = 821E60082DE200AD00716A80;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -148,9 +139,9 @@
 				DEVELOPMENT_TEAM = 65J6NKQTZK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "pokedex-challenge/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pokédex";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -176,9 +167,9 @@
 				DEVELOPMENT_TEAM = 65J6NKQTZK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "pokedex-challenge/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pokédex";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
