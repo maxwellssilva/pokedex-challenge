@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		821E60112DE200AD00716A80 /* pokedex-challenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "pokedex-challenge.app"; path = "/Users/maxwell.silva/Desktop/Geral/Study/pokedex-challenge/build/Debug-iphoneos/pokedex-challenge.app"; sourceTree = "<absolute>"; };
+		829354772DE4CFF4000A777F /* pokedex-challenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "pokedex-challenge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,6 +46,7 @@
 			isa = PBXGroup;
 			children = (
 				821E60132DE200AD00716A80 /* pokedex-challenge */,
+				829354772DE4CFF4000A777F /* pokedex-challenge.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -71,7 +72,7 @@
 			packageProductDependencies = (
 			);
 			productName = "pokedex-challenge";
-			productReference = 821E60112DE200AD00716A80 /* pokedex-challenge.app */;
+			productReference = 829354772DE4CFF4000A777F /* pokedex-challenge.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
