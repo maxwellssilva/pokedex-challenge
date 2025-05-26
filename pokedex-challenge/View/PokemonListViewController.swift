@@ -9,6 +9,7 @@ import UIKit
 
 class PokemonListViewController: UIViewController {
 
+    private var filterPokemon: [PokemonResult] = []
     private var isSearch = false
     private let viewModel: PokemonListViewModel
 
@@ -140,4 +141,15 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
 
 extension PokemonListViewController: UISearchBarDelegate {
     // TODO: Vou desenvolver o filtro de pokemons ainda
+    //func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    //        if searchText.isEmpty {
+    //            isSearch = false
+    //        } else {
+    //            isSearch = true
+    //            filterPokemon = pokemons.filter { pokemon in
+    //                return pokemon.name.lowercase().contains(searchText.lowercased())
+    //            }
+    //        }
+    //        tableView.reloadData()
+    //    }
 }
