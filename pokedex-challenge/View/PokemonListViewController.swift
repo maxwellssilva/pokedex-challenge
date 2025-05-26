@@ -8,9 +8,19 @@
 import UIKit
 
 class PokemonListViewController: UIViewController {
-    
+
     private var isSearch = false
-    
+    private let viewModel: PokemonListViewModel
+
+    init(viewModel: PokemonListViewModel = PokemonListViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Pesquise um pokémon"
@@ -20,62 +30,114 @@ class PokemonListViewController: UIViewController {
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
-    
+
     private lazy var tableView: UITableView = {
         let list = UITableView()
         list.delegate = self
         list.dataSource = self
-        list.register(PokeCell.self, forCellReuseIdentifier: "PokeCell")
+        list.register(PokeCell.self, forCellReuseIdentifier: PokeCell.identifier)
         list.translatesAutoresizingMaskIntoConstraints = false
         return list
+    }()
+
+    private lazy var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupLayoutPokemonList()
+        bindViewModel()
+        viewModel.fetchPokemons()
     }
-    
+
     func setupLayoutPokemonList() {
         view.addSubview(searchBar)
         view.addSubview(tableView)
+        view.addSubview(activityIndicator)
+
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
+
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 
+    private func bindViewModel() {
+        viewModel.isLoading.bind { [weak self] isLoading in
+            DispatchQueue.main.async {
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                }
+            }
+        }
+
+        viewModel.errorMessage.bind { [weak self] message in
+            DispatchQueue.main.async {
+                if let msg = message, !msg.isEmpty {
+                    self?.showAlert(message: msg)
+                }
+            }
+        }
+
+        viewModel.reloadData.bind { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+    }
+
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: "Erro", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
+// MARK: - UITableViewDataSource
 extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return viewModel.pokemons.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PokeCell", for: indexPath)
-        cell.textLabel?.text = "Pokémon \(indexPath.row + 1)"
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: PokeCell.identifier, for: indexPath) as? PokeCell else {
+            return UITableViewCell()
+        }
+        let pokemon = viewModel.pokemons[indexPath.row]
+        cell.configure(with: pokemon.name, id: indexPath.row + 1)
         return cell
     }
-    
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        viewModel.fetchMorePokemonsIfNeeded(currentIndex: indexPath.row)
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let selectedPokemon = viewModel.pokemons[indexPath.row]
+        print("Selected: \(selectedPokemon.name)")
+    }
 }
 
 extension PokemonListViewController: UISearchBarDelegate {
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchText.isEmpty {
-//            isSearch = false
-//        } else {
-//            isSearch = true
-//            filterPokemon = pokemons.filter { pokemon in
-//                return pokemon.name.lowercase().contains(searchText.lowercased())
-//            }
-//        }
-//        tableView.reloadData()
-//    }
+    // TODO: Vou desenvolver o filtro de pokemons ainda
 }

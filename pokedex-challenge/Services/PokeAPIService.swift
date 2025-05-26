@@ -5,38 +5,51 @@
 //  Created by Maxwell Silva on 24/05/25.
 //
 
-import UIKit
+import Foundation
+
+enum APIError: Error {
+    case invalidURL
+    case requestFailed(Error)
+    case invalidResponse
+    case decodingFailed(Error)
+    case unknown
+}
 
 class NetworkManager {
-    
+   
     static let shared = NetworkManager()
-        
+
     private init() {}
-    
-    let domainUrlString = "https://pokeapi.co/api/v2/"
-        
-    func fetchData(completionHandler: @escaping ([Pokemon]) -> Void) {
-        let url = URL(string: domainUrlString + "/pokemon/")!
-            
-        let task = URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {
-                print("Request Error!")
+
+    func fetchData<T: Decodable>(endpoint: String, completion: @escaping (Result<T, APIError>) -> Void) {
+        guard let url = URL(string: Constants.baseURL + endpoint) else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(.failure(.requestFailed(error)))
                 return
             }
-                
+
             guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                print("Error with the response, unexpected status code: \(String(describing: response))")
+                completion(.failure(.invalidResponse))
                 return
             }
-                
-            var result: [Pokemon]?
-            do {
-                result = try JSONDecoder().decode([Pokemon].self, from: data)
-            } catch {
-                print("Failed to convert \(error.localizedDescription)")
+
+            guard let data = data else {
+                completion(.failure(.invalidResponse))
+                return
             }
-            completionHandler(result ?? [])
-        })
-        task.resume()
+
+            do {
+                let decodedObject = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(decodedObject))
+            } catch {
+                print("Decoding failed for \(T.self): \(error)")
+                completion(.failure(.decodingFailed(error)))
+            }
+        }.resume()
     }
 }
