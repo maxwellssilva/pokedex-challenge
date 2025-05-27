@@ -109,14 +109,14 @@ class PokemonListViewController: UIViewController {
 
 extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.displayedPokemons.count
+        return viewModel.displayPokemons.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: PokeCell.identifier, for: indexPath) as? PokeCell else {
             return UITableViewCell()
         }
-        let pokemon = viewModel.displayedPokemons[indexPath.row]
+        let pokemon = viewModel.displayPokemons[indexPath.row]
         
         let idString = pokemon.url.components(separatedBy: "/").dropLast().last ?? "1"
         let pokemonID = Int(idString) ?? (indexPath.row + 1)
@@ -137,7 +137,7 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedPokemon = viewModel.displayedPokemons[indexPath.row]
+        let selectedPokemon = viewModel.displayPokemons[indexPath.row]
         print("Selecionado: \(selectedPokemon.name)")
     }
 }

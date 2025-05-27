@@ -23,7 +23,7 @@ class Observable<T> {
 
 class PokemonListViewModel {
     var allPokemons: [PokemonResult] = []
-    var displayedPokemons: [PokemonResult] = [] {
+    var displayPokemons: [PokemonResult] = [] {
         didSet {
             reloadData.value = ()
         }
@@ -76,16 +76,16 @@ class PokemonListViewModel {
     }
     
     func fetchMorePokemonsIfNeeded(currentIndex: Int) {
-        if allPokemons.count > 0 && currentIndex >= displayedPokemons.count - 5 && allPokemons.count < totalPokemonCount && !isLoading.value {
+        if allPokemons.count > 0 && currentIndex >= displayPokemons.count - 5 && allPokemons.count < totalPokemonCount && !isLoading.value {
             fetchPokemons()
         }
     }
     
     private func filterPokemons() {
         if searchText.isEmpty {
-            displayedPokemons = allPokemons
+            displayPokemons = allPokemons
         } else {
-            displayedPokemons = allPokemons.filter { pokemon in
+            displayPokemons = allPokemons.filter { pokemon in
                 return pokemon.name.lowercased().contains(searchText.lowercased())
             }
         }
