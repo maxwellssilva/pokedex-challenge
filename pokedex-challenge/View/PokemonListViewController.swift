@@ -8,9 +8,7 @@
 import UIKit
 
 class PokemonListViewController: UIViewController {
-
-    private var filterPokemon: [PokemonResult] = []
-    private var isSearch = false
+    
     private let viewModel: PokemonListViewModel
 
     init(viewModel: PokemonListViewModel = PokemonListViewModel()) {
@@ -109,18 +107,21 @@ class PokemonListViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource
 extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.pokemons.count
+        return viewModel.displayPokemons.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: PokeCell.identifier, for: indexPath) as? PokeCell else {
             return UITableViewCell()
         }
-        let pokemon = viewModel.pokemons[indexPath.row]
-        cell.configure(with: pokemon.name, id: indexPath.row + 1)
+        let pokemon = viewModel.displayPokemons[indexPath.row]
+        
+        let idString = pokemon.url.components(separatedBy: "/").dropLast().last ?? "1"
+        let pokemonID = Int(idString) ?? (indexPath.row + 1)
+        
+        cell.configure(with: pokemon.name, id: pokemonID)
         return cell
     }
 
@@ -129,27 +130,30 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        viewModel.fetchMorePokemonsIfNeeded(currentIndex: indexPath.row)
+        if viewModel.searchText.isEmpty {
+            viewModel.fetchMorePokemonsIfNeeded(currentIndex: indexPath.row)
+        }
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedPokemon = viewModel.pokemons[indexPath.row]
-        print("Selected: \(selectedPokemon.name)")
+        let selectedPokemon = viewModel.displayPokemons[indexPath.row]
+        print("Selecionado: \(selectedPokemon.name)")
     }
 }
 
 extension PokemonListViewController: UISearchBarDelegate {
-    // TODO: Vou desenvolver o filtro de pokemons ainda
-    //func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-    //        if searchText.isEmpty {
-    //            isSearch = false
-    //        } else {
-    //            isSearch = true
-    //            filterPokemon = pokemons.filter { pokemon in
-    //                return pokemon.name.lowercase().contains(searchText.lowercased())
-    //            }
-    //        }
-    //        tableView.reloadData()
-    //    }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.searchText = searchText
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        viewModel.resetSearch()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
 }

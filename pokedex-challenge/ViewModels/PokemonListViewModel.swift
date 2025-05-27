@@ -22,53 +22,76 @@ class Observable<T> {
 }
 
 class PokemonListViewModel {
-    var pokemons: [PokemonResult] = [] {
+    var allPokemons: [PokemonResult] = []
+    var displayPokemons: [PokemonResult] = [] {
         didSet {
             reloadData.value = ()
         }
     }
+    
     let isLoading: Observable<Bool> = Observable(false)
     let errorMessage: Observable<String?> = Observable(nil)
     let reloadData: Observable<Void> = Observable(())
-
+    
+    var searchText: String = "" {
+        didSet {
+            filterPokemons()
+        }
+    }
+    
     private var currentPage = 0
     private let limit = 20
     private var totalPokemonCount = 0
-
+    
     private let networkManager: NetworkManager
-
+    
     init(networkManager: NetworkManager = .shared) {
         self.networkManager = networkManager
     }
-
+    
     func fetchPokemons() {
         guard !isLoading.value else { return }
-
+        
         isLoading.value = true
         errorMessage.value = nil
-
+        
         let offset = currentPage * limit
         let endpoint = "\(Constants.pokemonListEndpoint)?offset=\(offset)&limit=\(limit)"
-
+        
         networkManager.fetchData(endpoint: endpoint) { [weak self] (result: Result<PokemonListResponse, APIError>) in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 self.isLoading.value = false
                 switch result {
                 case .success(let response):
-                    self.pokemons.append(contentsOf: response.results)
+                    self.allPokemons.append(contentsOf: response.results)
                     self.totalPokemonCount = response.count
                     self.currentPage += 1
+                    self.filterPokemons()
                 case .failure(let error):
                     self.errorMessage.value = "Failed to fetch Pokemons: \(error.localizedDescription)"
                 }
             }
         }
     }
-
+    
     func fetchMorePokemonsIfNeeded(currentIndex: Int) {
-        if pokemons.count > 0 && currentIndex >= pokemons.count - 5 && pokemons.count < totalPokemonCount && !isLoading.value {
+        if allPokemons.count > 0 && currentIndex >= displayPokemons.count - 5 && allPokemons.count < totalPokemonCount && !isLoading.value {
             fetchPokemons()
         }
+    }
+    
+    private func filterPokemons() {
+        if searchText.isEmpty {
+            displayPokemons = allPokemons
+        } else {
+            displayPokemons = allPokemons.filter { pokemon in
+                return pokemon.name.lowercased().contains(searchText.lowercased())
+            }
+        }
+    }
+    
+    func resetSearch() {
+        searchText = ""
     }
 }
