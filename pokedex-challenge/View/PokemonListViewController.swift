@@ -139,9 +139,18 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedPokemon = viewModel.displayPokemons[indexPath.row]
-        print("Selecionado: \(selectedPokemon.name)")
-        let pokemonDetailViewController = PokemonDetailViewController()
-        navigationController?.pushViewController(pokemonDetailViewController, animated: true)
+        // Extrai o ID do Pokémon da URL
+        let idString = selectedPokemon.url.components(separatedBy: "/").dropLast().last ?? "1"
+        guard let pokemonID = Int(idString) else {
+            print("Erro ao extrair ID do Pokémon da URL: \(selectedPokemon.url)")
+            return
+        }
+        // 1. Instancia a ViewModel da tela de detalhes, passando o Pokémon e o ID
+        let detailViewModel = PokemonDetailViewModel(pokemon: selectedPokemon, id: pokemonID)
+        // 2. Instancia a ViewController de detalhes, injetando a ViewModel
+        let detailViewController = PokemonDetailViewController(viewModel: detailViewModel)
+        // 3. Empurra a nova ViewController para a pilha de navegação
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
 }
 
