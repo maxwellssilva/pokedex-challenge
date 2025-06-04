@@ -26,69 +26,109 @@ struct Sprites: Codable {
         case frontDefault = "front_default"
     }
 }
-//
-// This file was generated from JSON Schema using quicktype, do not modify it directly.
-// To parse the JSON, add this file to your project and do:
-//
-//   let pokedex = try? JSONDecoder().decode(Pokedex.self, from: jsonData)
 
-// MARK: - Pokedex dados
-struct Pokedex: Codable {
-    let ability, berry, berryFirmness, berryFlavor: String
-    let characteristic, contestEffect, contestType, eggGroup: String
-    let encounterCondition, encounterConditionValue, encounterMethod, evolutionChain: String
-    let evolutionTrigger, gender, generation, growthRate: String
-    let item, itemAttribute, itemCategory, itemFlingEffect: String
-    let itemPocket, language, location, locationArea: String
-    let machine, move, moveAilment, moveBattleStyle: String
-    let moveCategory, moveDamageClass, moveLearnMethod, moveTarget: String
-    let nature, palParkArea, pokeathlonStat, pokedex: String
-    let pokemon, pokemonColor, pokemonForm, pokemonHabitat: String
-    let pokemonShape, pokemonSpecies, region, stat: String
-    let superContestEffect, type, version, versionGroup: String
+// Em PokemonModel.swift
+
+// Mantenha PokemonListResponse e PokemonResult como estão.
+
+// MARK: - Pokemon Detail Model (para /pokemon/{id})
+struct PokemonDetail: Codable {
+    let id: Int
+    let name: String
+    let height: Int // Altura em decímetros
+    let weight: Int // Peso em hectogramas
+    let sprites: PokemonSprites
+    let stats: [StatElement]
+    let types: [TypeElement]
+    let species: APIResource // Link para buscar detalhes da espécie
+    // Adicione 'abilities' se quiser listar as habilidades também
+    // let abilities: [AbilityElement]
+}
+
+struct PokemonSprites: Codable {
+    let frontDefault: String?
+    let other: OtherSprites?
 
     enum CodingKeys: String, CodingKey {
-        case ability, berry
-        case berryFirmness = "berry-firmness"
-        case berryFlavor = "berry-flavor"
-        case characteristic
-        case contestEffect = "contest-effect"
-        case contestType = "contest-type"
-        case eggGroup = "egg-group"
-        case encounterCondition = "encounter-condition"
-        case encounterConditionValue = "encounter-condition-value"
-        case encounterMethod = "encounter-method"
-        case evolutionChain = "evolution-chain"
-        case evolutionTrigger = "evolution-trigger"
-        case gender, generation
-        case growthRate = "growth-rate"
-        case item
-        case itemAttribute = "item-attribute"
-        case itemCategory = "item-category"
-        case itemFlingEffect = "item-fling-effect"
-        case itemPocket = "item-pocket"
-        case language, location
-        case locationArea = "location-area"
-        case machine, move
-        case moveAilment = "move-ailment"
-        case moveBattleStyle = "move-battle-style"
-        case moveCategory = "move-category"
-        case moveDamageClass = "move-damage-class"
-        case moveLearnMethod = "move-learn-method"
-        case moveTarget = "move-target"
-        case nature
-        case palParkArea = "pal-park-area"
-        case pokeathlonStat = "pokeathlon-stat"
-        case pokedex, pokemon
-        case pokemonColor = "pokemon-color"
-        case pokemonForm = "pokemon-form"
-        case pokemonHabitat = "pokemon-habitat"
-        case pokemonShape = "pokemon-shape"
-        case pokemonSpecies = "pokemon-species"
-        case region, stat
-        case superContestEffect = "super-contest-effect"
-        case type, version
-        case versionGroup = "version-group"
+        case frontDefault = "front_default"
+        case other
     }
 }
+
+struct OtherSprites: Codable {
+    let officialArtwork: OfficialArtwork?
+
+    enum CodingKeys: String, CodingKey {
+        case officialArtwork = "official-artwork"
+    }
+}
+
+struct OfficialArtwork: Codable {
+    let frontDefault: String?
+
+    enum CodingKeys: String, CodingKey {
+        case frontDefault = "front_default"
+    }
+}
+
+struct StatElement: Codable {
+    let baseStat: Int
+    let stat: APIResource // Contém o nome do stat (e.g., "hp", "attack", "defense")
+
+    enum CodingKeys: String, CodingKey {
+        case baseStat = "base_stat"
+        case stat
+    }
+}
+
+struct TypeElement: Codable {
+    let slot: Int
+    let type: APIResource // Contém o nome do tipo (e.g., "grass", "poison")
+}
+
+// struct AbilityElement: Codable {
+//     let ability: APIResource
+//     let isHidden: Bool
+//     let slot: Int
+//
+//     enum CodingKeys: String, CodingKey {
+//         case ability
+//         case isHidden = "is_hidden"
+//         case slot
+//     }
+// }
+
+struct APIResource: Codable { // Estrutura genérica para links da API
+    let name: String
+    let url: String
+}
+
+
+// MARK: - Pokemon Species Detail Model (para /pokemon-species/{id})
+struct PokemonSpeciesDetail: Codable {
+    let color: APIResource? // Cor primária da espécie, pode ser usada como fallback
+    let genera: [Genus] // Contém a "categoria" em diferentes idiomas (ex: "Seed Pokémon")
+    let habitat: APIResource?
+    // Adicione 'flavor_text_entries' se quiser exibir a descrição da Pokédex
+    // let flavorTextEntries: [FlavorTextEntry]
+
+    enum CodingKeys: String, CodingKey {
+        case color, genera, habitat //, flavorTextEntries = "flavor_text_entries"
+    }
+}
+
+struct Genus: Codable {
+    let genus: String
+    let language: APIResource // Para filtrar pelo idioma (ex: "en")
+}
+
+// struct FlavorTextEntry: Codable {
+//     let flavorText: String
+//     let language: APIResource
+//
+//     enum CodingKeys: String, CodingKey {
+//         case flavorText = "flavor_text"
+//         case language
+//     }
+// }
 

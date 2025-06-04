@@ -11,31 +11,112 @@ class PokemonDetailViewController: UIViewController {
     
     private let viewModel: PokemonDetailViewModel
     
-    private lazy var pokeball: UIImageView = {
+    private lazy var headerBackgroundView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var pokeballImageView: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "pokeball-background")
+        image.contentMode = .scaleAspectFit
+        image.alpha = 0.15
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
     
-    private lazy var pokeImage: UIImageView = {
+    private lazy var pokemonImageView: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.heightAnchor.constraint(equalToConstant: 200).isActive = true
         return image
     }()
     
-    private lazy var stackContainer: UIStackView = {
-        let container = UIStackView(arrangedSubviews: [nameLabel])
-        container.axis = .vertical
-        container.translatesAutoresizingMaskIntoConstraints = false
-        return container
+    private lazy var scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        return scroll
     }()
     
-    lazy var nameLabel = UILabel()
-    lazy var attackLabel = UILabel()
+    private lazy var contentStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [
+            nameIdTypeStackView,
+            speciesLabel,
+            statsHeaderLabel,
+            statsStackView])
+        stack.axis = .vertical
+        stack.spacing = 16
+        stack.alignment = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private lazy var nameIdTypeStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [nameLabel, idLabel, typesLabel])
+        stack.axis = .vertical
+        stack.spacing = 4
+        stack.alignment = .center
+        return stack
+    }()
+
+    private lazy var nameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+
+    private lazy var idLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .white.withAlphaComponent(0.8)
+        label.textAlignment = .center
+        return label
+    }()
+
+    private lazy var typesLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+
+    private lazy var speciesLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        label.textColor = .systemGray
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var statsHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Base Stats"
+        label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        label.textColor = .label
+        label.textAlignment = .left
+        return label
+    }()
+
+    private lazy var statsStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private lazy var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        indicator.color = .white
+        return indicator
+    }()
     
     init(viewModel: PokemonDetailViewModel) {
         self.viewModel = viewModel
@@ -46,51 +127,194 @@ class PokemonDetailViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func loadView() {
-        super.loadView()
-        setupPokeDetail()
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .fire
-        title = "Detalhes"
-        setupPokeDetail()
+        view.backgroundColor = .systemBackground
+        setupNavigationBar()
+        setupLayoutDetailScreen()
         bindViewModel()
     }
     
-    private func setupPokeDetail() {
-        view.addSubview(pokeball)
-        view.addSubview(pokeImage)
-        view.addSubview(stackContainer)
+    private func setupNavigationBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 18, weight: .semibold)]
+        appearance.setBackIndicatorImage(UIImage(systemName: "arrow.backward"), transitionMaskImage: UIImage(systemName: "arrow.backward"))
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.tintColor = .white
+        
+        self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        self.title = " "
+    }
+    
+    private func setupLayoutDetailScreen() {
+        view.addSubview(headerBackgroundView)
+        headerBackgroundView.addSubview(pokeballImageView)
+        headerBackgroundView.addSubview(pokemonImageView)
+        headerBackgroundView.addSubview(nameIdTypeStackView)
+        headerBackgroundView.addSubview(activityIndicator)
+
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentStackView)
+
+        let headerHeight: CGFloat = view.bounds.height * 0.40
         NSLayoutConstraint.activate([
-            pokeball.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            pokeball.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            headerBackgroundView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerBackgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            headerBackgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            headerBackgroundView.heightAnchor.constraint(equalToConstant: headerHeight),
             
-            pokeImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
-            pokeImage.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            pokeImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            pokeballImageView.topAnchor.constraint(equalTo: headerBackgroundView.safeAreaLayoutGuide.topAnchor, constant: -20),
+            pokeballImageView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -10),
+            pokeballImageView.widthAnchor.constraint(equalTo: headerBackgroundView.widthAnchor, multiplier: 0.6),
+            pokeballImageView.heightAnchor.constraint(equalTo: pokeballImageView.widthAnchor),
+
+            pokemonImageView.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
+            pokemonImageView.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor, constant: -20),
+            pokemonImageView.heightAnchor.constraint(equalTo: headerBackgroundView.heightAnchor, multiplier: 0.5),
+            pokemonImageView.widthAnchor.constraint(equalTo: pokemonImageView.heightAnchor),
             
-            stackContainer.topAnchor.constraint(equalTo: pokeImage.bottomAnchor, constant: 50),
-            stackContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            stackContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            stackContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            nameIdTypeStackView.topAnchor.constraint(equalTo: pokemonImageView.bottomAnchor, constant: 8),
+            nameIdTypeStackView.leadingAnchor.constraint(equalTo: headerBackgroundView.leadingAnchor, constant: 20),
+            nameIdTypeStackView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -20),
+            nameIdTypeStackView.bottomAnchor.constraint(lessThanOrEqualTo: headerBackgroundView.bottomAnchor, constant: -20),
+
+            activityIndicator.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor),
+            
+            scrollView.topAnchor.constraint(equalTo: headerBackgroundView.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 20),
+            contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 20),
+            contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -20),
+            contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -20),
+            contentStackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -40)
         ])
     }
     
     // MARK: - Bind ViewModel
     private func bindViewModel() {
+        viewModel.isLoading.bind { [weak self] isLoading in
+            DispatchQueue.main.async {
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                }
+            }
+        }
+
+        viewModel.errorMessage.bind { [weak self] message in
+            DispatchQueue.main.async {
+                if let msg = message, !msg.isEmpty {
+                    self?.showAlert(message: msg)
+                }
+            }
+        }
         
         viewModel.pokemonName.bind { [weak self] name in
             self?.nameLabel.text = name
+            self?.title = name
+        }
+        
+        viewModel.pokemonIdDisplay.bind { [weak self] idText in
+            self?.idLabel.text = idText
         }
             
         viewModel.pokemonImageUrl.bind { [weak self] imageUrlString in
             if let urlString = imageUrlString, let url = URL(string: urlString) {
-                self?.pokeImage.download(from: url)
+                self?.pokemonImageView.download(from: url)
             } else {
-                self?.pokeImage.image = nil
+                self?.pokemonImageView.image = UIImage(systemName: "questionmark.circle.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
             }
         }
+        
+        viewModel.viewBackgroundColor.bind { [weak self] color in
+            DispatchQueue.main.async {
+                let finalColor = color ?? UIColor.systemGray
+                self?.headerBackgroundView.backgroundColor = finalColor
+            }
+        }
+        
+        viewModel.pokemonTypesText.bind { [weak self] typesText in
+            self?.typesLabel.text = typesText
+        }
+        
+        viewModel.speciesCategory.bind { [weak self] category in
+            self?.speciesLabel.text = category ?? "Unknown species"
+        }
+        
+        viewModel.stats.bind { [weak self] statsData in
+            self?.updateStatsUI(stats: statsData)
+        }
+    }
+
+    private func updateStatsUI(stats: [StatElement]) {
+        statsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        let statOrder: [String: String] = [
+            "hp": "HP",
+            "attack": "Attack",
+            "defense": "Defense",
+            "special-attack": "Sp. Atk",
+            "special-defense": "Sp. Def",
+            "speed": "Speed"
+        ]
+        
+        let maxStatValue: Float = 255.0
+
+        for (key, displayName) in statOrder {
+            if let statInfo = stats.first(where: { $0.stat.name.lowercased() == key }) {
+                let statView = createStatRow(name: displayName, value: statInfo.baseStat, maxValue: maxStatValue)
+                statsStackView.addArrangedSubview(statView)
+            }
+        }
+        self.view.layoutIfNeeded()
+    }
+
+    private func createStatRow(name: String, value: Int, maxValue: Float) -> UIView {
+        let hStack = UIStackView()
+        hStack.axis = .horizontal
+        hStack.spacing = 8
+        hStack.alignment = .center
+
+        let nameLabel = UILabel()
+        nameLabel.text = name
+        nameLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        nameLabel.textColor = .systemGray
+        nameLabel.widthAnchor.constraint(equalToConstant: 70).isActive = true
+
+        let valueLabel = UILabel()
+        valueLabel.text = "\(value)"
+        valueLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        valueLabel.textColor = .label
+        valueLabel.widthAnchor.constraint(equalToConstant: 35).isActive = true
+
+        let progressBar = UIProgressView(progressViewStyle: .default)
+        let progress = Float(value) / maxValue
+        progressBar.setProgress(progress, animated: true)
+        progressBar.progressTintColor = viewModel.viewBackgroundColor.value ?? .systemBlue
+        progressBar.trackTintColor = UIColor.systemGray5
+        progressBar.layer.cornerRadius = 4
+        progressBar.clipsToBounds = true
+        progressBar.heightAnchor.constraint(equalToConstant: 8).isActive = true
+
+        hStack.addArrangedSubview(nameLabel)
+        hStack.addArrangedSubview(valueLabel)
+        hStack.addArrangedSubview(progressBar)
+        
+        return hStack
+    }
+
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }
