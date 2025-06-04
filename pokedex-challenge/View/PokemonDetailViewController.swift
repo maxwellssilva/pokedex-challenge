@@ -19,9 +19,9 @@ class PokemonDetailViewController: UIViewController {
 
     private lazy var pokeballImageView: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(named: "pokeball-background")
+        image.image = UIImage(named: "pokeball-3")
         image.contentMode = .scaleAspectFit
-        image.alpha = 0.15
+        image.alpha = 1.0
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -34,6 +34,16 @@ class PokemonDetailViewController: UIViewController {
         return image
     }()
     
+    private lazy var typesPillStackView: UIStackView = { // NOVA STACKVIEW
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 8 // Espaçamento entre as pílulas
+        stack.alignment = .center
+        stack.distribution = .fillProportionally
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
     private lazy var scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
@@ -43,7 +53,8 @@ class PokemonDetailViewController: UIViewController {
     private lazy var contentStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [
             nameIdTypeStackView,
-            speciesLabel,
+            //typesPillStackView,
+            //speciesLabel,
             statsHeaderLabel,
             statsStackView])
         stack.axis = .vertical
@@ -54,7 +65,7 @@ class PokemonDetailViewController: UIViewController {
     }()
     
     private lazy var nameIdTypeStackView: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [nameLabel, idLabel, typesLabel])
+        let stack = UIStackView(arrangedSubviews: [nameLabel, idLabel])
         stack.axis = .vertical
         stack.spacing = 4
         stack.alignment = .center
@@ -156,6 +167,8 @@ class PokemonDetailViewController: UIViewController {
         headerBackgroundView.addSubview(pokemonImageView)
         headerBackgroundView.addSubview(nameIdTypeStackView)
         headerBackgroundView.addSubview(activityIndicator)
+        
+        view.addSubview(typesPillStackView)
 
         view.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
@@ -167,13 +180,13 @@ class PokemonDetailViewController: UIViewController {
             headerBackgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             headerBackgroundView.heightAnchor.constraint(equalToConstant: headerHeight),
             
-            pokeballImageView.topAnchor.constraint(equalTo: headerBackgroundView.safeAreaLayoutGuide.topAnchor, constant: -20),
+            pokeballImageView.topAnchor.constraint(equalTo: headerBackgroundView.safeAreaLayoutGuide.topAnchor, constant: -16),
             pokeballImageView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -10),
             pokeballImageView.widthAnchor.constraint(equalTo: headerBackgroundView.widthAnchor, multiplier: 0.6),
             pokeballImageView.heightAnchor.constraint(equalTo: pokeballImageView.widthAnchor),
 
             pokemonImageView.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
-            pokemonImageView.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor, constant: -20),
+            pokemonImageView.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor, constant: 30),
             pokemonImageView.heightAnchor.constraint(equalTo: headerBackgroundView.heightAnchor, multiplier: 0.5),
             pokemonImageView.widthAnchor.constraint(equalTo: pokemonImageView.heightAnchor),
             
@@ -185,12 +198,17 @@ class PokemonDetailViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor),
             
-            scrollView.topAnchor.constraint(equalTo: headerBackgroundView.bottomAnchor),
+            typesPillStackView.topAnchor.constraint(equalTo: headerBackgroundView.bottomAnchor, constant: 10),
+            typesPillStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            typesPillStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            typesPillStackView.bottomAnchor.constraint(equalTo: scrollView.topAnchor),
+            
+            scrollView.topAnchor.constraint(equalTo: typesPillStackView.bottomAnchor, constant: 40),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 20),
+            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: -70),
             contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 20),
             contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -20),
             contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -20),
@@ -201,59 +219,89 @@ class PokemonDetailViewController: UIViewController {
     // MARK: - Bind ViewModel
     private func bindViewModel() {
         viewModel.isLoading.bind { [weak self] isLoading in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 if isLoading {
-                    self?.activityIndicator.startAnimating()
+                    self.activityIndicator.startAnimating()
                 } else {
-                    self?.activityIndicator.stopAnimating()
+                    self.activityIndicator.stopAnimating()
                 }
             }
         }
-
+        
         viewModel.errorMessage.bind { [weak self] message in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 if let msg = message, !msg.isEmpty {
-                    self?.showAlert(message: msg)
+                    self.showAlert(message: msg)
                 }
             }
         }
         
         viewModel.pokemonName.bind { [weak self] name in
-            self?.nameLabel.text = name
-            self?.title = name
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.nameLabel.text = name
+                self.title = name
+            }
         }
         
         viewModel.pokemonIdDisplay.bind { [weak self] idText in
-            self?.idLabel.text = idText
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.idLabel.text = idText
+            }
         }
-            
+        
         viewModel.pokemonImageUrl.bind { [weak self] imageUrlString in
-            if let urlString = imageUrlString, let url = URL(string: urlString) {
-                self?.pokemonImageView.download(from: url)
-            } else {
-                self?.pokemonImageView.image = UIImage(systemName: "questionmark.circle.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                if let urlString = imageUrlString, let url = URL(string: urlString) {
+                    self.pokemonImageView.download(from: url)
+                } else {
+                    self.pokemonImageView.image = UIImage(systemName: "questionmark.circle.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+                }
             }
         }
         
         viewModel.viewBackgroundColor.bind { [weak self] color in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 let finalColor = color ?? UIColor.systemGray
-                self?.headerBackgroundView.backgroundColor = finalColor
+                self.headerBackgroundView.backgroundColor = finalColor
             }
         }
         
         viewModel.pokemonTypesText.bind { [weak self] typesText in
-            self?.typesLabel.text = typesText
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.typesPillStackView.arrangedSubviews.forEach { $0.removeFromSuperview() } // Limpa pílulas existentes
+                
+                if let typesString = typesText, !typesString.isEmpty {
+                    let typeNames = typesString.components(separatedBy: " / ")
+                    for typeName in typeNames {
+                        let pillLabel = self.createTypePill(typeName: typeName)
+                        self.typesPillStackView.addArrangedSubview(pillLabel)
+                    }
+                }
+            }
         }
         
         viewModel.speciesCategory.bind { [weak self] category in
-            self?.speciesLabel.text = category ?? "Unknown species"
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.speciesLabel.text = category ?? "Unknown species"
+            }
         }
         
         viewModel.stats.bind { [weak self] statsData in
-            self?.updateStatsUI(stats: statsData)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.updateStatsUI(stats: statsData)
+            }
         }
     }
+
 
     private func updateStatsUI(stats: [StatElement]) {
         statsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -276,6 +324,27 @@ class PokemonDetailViewController: UIViewController {
             }
         }
         self.view.layoutIfNeeded()
+    }
+    
+    private func createTypePill(typeName: String) -> UILabel {
+        let label = UILabel()
+        label.text = typeName
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.layer.cornerRadius = 12 // Metade da altura esperada para um visual de pílula
+        label.layer.masksToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Cor de fundo baseada no tipo (usando sua função existente)
+        label.backgroundColor = viewModel.colorForType(typeName: typeName) ?? .systemGray
+        
+        // Padding
+        let padding: CGFloat = 8
+        label.widthAnchor.constraint(greaterThanOrEqualToConstant: label.intrinsicContentSize.width + (padding * 2)).isActive = true
+        label.heightAnchor.constraint(equalToConstant: 24).isActive = true // Altura fixa para a pílula
+        
+        return label
     }
 
     private func createStatRow(name: String, value: Int, maxValue: Float) -> UIView {

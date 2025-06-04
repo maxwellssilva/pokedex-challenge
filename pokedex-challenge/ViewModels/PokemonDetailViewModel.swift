@@ -8,9 +8,8 @@
 import UIKit
 
 class PokemonDetailViewModel {
-    // Observables para a View
     let pokemonName: Observable<String>
-    let pokemonIdDisplay: Observable<String> // Ex: "#001"
+    let pokemonIdDisplay: Observable<String>
     let pokemonImageUrl: Observable<String?>
     let pokemonTypesText: Observable<String?> = Observable(nil)
     let speciesCategory: Observable<String?> = Observable(nil)
@@ -30,7 +29,6 @@ class PokemonDetailViewModel {
 
         self.pokemonName = Observable(pokemon.name.capitalized)
         self.pokemonIdDisplay = Observable(String(format: "#%03d", id))
-        // URL da imagem oficial (artwork)
         self.pokemonImageUrl = Observable("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\(id).png")
         
         fetchDetails()
@@ -80,39 +78,36 @@ class PokemonDetailViewModel {
     }
 
     private func fetchSpeciesDetails(speciesURL: String) {
-        // O NetworkManager espera um endpoint relativo à baseURL.
-        // Precisamos extrair o path da URL completa da espécie.
         guard let url = URL(string: speciesURL) else {
             DispatchQueue.main.async {
                 self.errorMessage.value = "Invalid species URL."
-                self.isLoading.value = false // Finaliza o loading aqui se a URL da espécie for inválida
+                self.isLoading.value = false
             }
             return
         }
         
-        // Exemplo: https://pokeapi.co/api/v2/pokemon-species/1/ -> pokemon-species/1/
         let pathComponents = url.pathComponents
-        // Encontra o índice de "v2" e pega o restante
         if let apiVersionIndex = pathComponents.firstIndex(of: "v2"), apiVersionIndex + 1 < pathComponents.count {
             let speciesEndpoint = pathComponents.suffix(from: apiVersionIndex + 1).joined(separator: "/")
             
             networkManager.fetchData(endpoint: speciesEndpoint) { [weak self] (result: Result<PokemonSpeciesDetail, APIError>) in
                 guard let self = self else { return }
-                DispatchQueue.main.async {
-                    self.isLoading.value = false // Finaliza o loading após a segunda chamada
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.isLoading.value = false
                     switch result {
                     case .success(let speciesData):
                         if let genusEntry = speciesData.genera.first(where: { $0.language.name == "en" }) {
+                            let cleanedGenus = genusEntry.genus.replacingOccurrences(of: " Pokémon", with: "")
                             self.speciesCategory.value = genusEntry.genus
                         }
-                        // Opcional: Usar speciesData.color.name como fallback para backgroundColor se o tipo não definir uma cor
+                        
                         if self.viewBackgroundColor.value == nil || self.viewBackgroundColor.value == .systemGray {
                              if let speciesColorName = speciesData.color?.name {
                                  self.viewBackgroundColor.value = self.colorForType(typeName: speciesColorName)
                              }
                         }
                     case .failure(let error):
-                        // Não sobrescrever um erro mais crítico da primeira chamada
                         if self.errorMessage.value == nil {
                              self.errorMessage.value = "Failed to fetch species details: \(error.localizedDescription)"
                         }
