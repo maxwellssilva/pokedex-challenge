@@ -34,10 +34,10 @@ class PokemonDetailViewController: UIViewController {
         return image
     }()
     
-    private lazy var typesPillStackView: UIStackView = { // NOVA STACKVIEW
+    private lazy var typesPillStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
-        stack.spacing = 8 // Espaçamento entre as pílulas
+        stack.spacing = 8
         stack.alignment = .center
         stack.distribution = .fillProportionally
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -51,12 +51,7 @@ class PokemonDetailViewController: UIViewController {
     }()
     
     private lazy var contentStackView: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [
-            nameIdTypeStackView,
-            //typesPillStackView,
-            //speciesLabel,
-            statsHeaderLabel,
-            statsStackView])
+        let stack = UIStackView(arrangedSubviews: [statsHeaderLabel, statsStackView])
         stack.axis = .vertical
         stack.spacing = 16
         stack.alignment = .fill
@@ -67,14 +62,13 @@ class PokemonDetailViewController: UIViewController {
     private lazy var nameIdTypeStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [nameLabel, idLabel])
         stack.axis = .vertical
-        stack.spacing = 4
         stack.alignment = .center
         return stack
     }()
 
     private lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
         label.textColor = .white
         label.textAlignment = .center
         return label
@@ -82,7 +76,7 @@ class PokemonDetailViewController: UIViewController {
 
     private lazy var idLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
         label.textColor = .white.withAlphaComponent(0.8)
         label.textAlignment = .center
         return label
@@ -173,7 +167,7 @@ class PokemonDetailViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
 
-        let headerHeight: CGFloat = view.bounds.height * 0.40
+        let headerHeight: CGFloat = view.bounds.height * 0.50
         NSLayoutConstraint.activate([
             headerBackgroundView.topAnchor.constraint(equalTo: view.topAnchor),
             headerBackgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -193,7 +187,7 @@ class PokemonDetailViewController: UIViewController {
             nameIdTypeStackView.topAnchor.constraint(equalTo: pokemonImageView.bottomAnchor, constant: 8),
             nameIdTypeStackView.leadingAnchor.constraint(equalTo: headerBackgroundView.leadingAnchor, constant: 20),
             nameIdTypeStackView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -20),
-            nameIdTypeStackView.bottomAnchor.constraint(lessThanOrEqualTo: headerBackgroundView.bottomAnchor, constant: -20),
+            nameIdTypeStackView.bottomAnchor.constraint(equalTo: headerBackgroundView.bottomAnchor, constant: -10),
 
             activityIndicator.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor),
@@ -203,12 +197,12 @@ class PokemonDetailViewController: UIViewController {
             typesPillStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
             typesPillStackView.bottomAnchor.constraint(equalTo: scrollView.topAnchor),
             
-            scrollView.topAnchor.constraint(equalTo: typesPillStackView.bottomAnchor, constant: 40),
+            scrollView.topAnchor.constraint(equalTo: typesPillStackView.bottomAnchor, constant: -10),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: -70),
+            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 10),
             contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 20),
             contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -20),
             contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -20),
