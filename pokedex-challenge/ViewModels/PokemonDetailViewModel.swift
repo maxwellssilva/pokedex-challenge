@@ -46,10 +46,8 @@ class PokemonDetailViewModel {
             switch result {
             case .success(let detailData):
                 self.currentPokemonDetail = detailData
-                // Atualiza o nome com o que veio da API de detalhes (pode ter capitalização diferente)
                 self.pokemonName.value = detailData.name.capitalized
                 
-                // Atualiza a URL da imagem se a do endpoint de detalhes for preferida e existir
                 if let artworkUrl = detailData.sprites.other?.officialArtwork?.frontDefault {
                     self.pokemonImageUrl.value = artworkUrl
                 }
@@ -60,12 +58,10 @@ class PokemonDetailViewModel {
                 if let firstTypeName = detailData.types.first?.type.name {
                     self.viewBackgroundColor.value = self.colorForType(typeName: firstTypeName)
                 } else {
-                    self.viewBackgroundColor.value = UIColor(named: "defaultBackgroundColor") ?? .systemGray // Cor padrão
+                    self.viewBackgroundColor.value = UIColor(named: "defaultBackgroundColor") ?? .systemGray
                 }
                 
                 self.stats.value = detailData.stats
-                
-                // Busca os detalhes da espécie
                 self.fetchSpeciesDetails(speciesURL: detailData.species.url)
                 
             case .failure(let error):
@@ -117,47 +113,37 @@ class PokemonDetailViewModel {
         } else {
             DispatchQueue.main.async {
                 self.errorMessage.value = "Could not parse species endpoint from URL."
-                self.isLoading.value = false // Finaliza o loading
+                self.isLoading.value = false
             }
         }
     }
     
-    // Mapeia o nome do tipo para uma cor. Você tem assets para:
-    // bug, dragon, electric, fire, grass
     func colorForType(typeName: String) -> UIColor? {
         let colorName = typeName.lowercased()
-        // Tenta carregar diretamente do asset catalog (assumindo que os nomes dos Color Sets são os nomes dos tipos)
         if let colorFromAssets = UIColor(named: colorName) {
             return colorFromAssets
         }
         
-        // Se seus assets estiverem em uma pasta "colors", use:
-        // if let colorFromAssets = UIColor(named: "colors/\(colorName)") {
-        //     return colorFromAssets
-        // }
-
-        // Fallback para cores hardcoded se não encontrar no asset ou para tipos comuns não listados nos seus assets.
         switch colorName {
-            case "normal": return UIColor(red: 0.66, green: 0.65, blue: 0.47, alpha: 1.00) // A8A878
-            case "fighting": return UIColor(red: 0.75, green: 0.19, blue: 0.16, alpha: 1.00) // C03028
-            case "flying": return UIColor(red: 0.66, green: 0.56, blue: 0.94, alpha: 1.00) // A890F0
-            case "poison": return UIColor(red: 0.63, green: 0.25, blue: 0.63, alpha: 1.00) // A040A0
-            case "ground": return UIColor(red: 0.88, green: 0.75, blue: 0.40, alpha: 1.00) // E0C068
-            case "rock": return UIColor(red: 0.71, green: 0.63, blue: 0.22, alpha: 1.00) // B8A038
-            case "ghost": return UIColor(red: 0.44, green: 0.34, blue: 0.59, alpha: 1.00) // 705898
-            case "steel": return UIColor(red: 0.72, green: 0.72, blue: 0.81, alpha: 1.00) // B8B8D0
-            case "water": return UIColor(red: 0.40, green: 0.56, blue: 0.94, alpha: 1.00) // 6890F0
-            case "psychic": return UIColor(red: 0.97, green: 0.34, blue: 0.53, alpha: 1.00) // F85888
-            case "ice": return UIColor(red: 0.60, green: 0.85, blue: 0.85, alpha: 1.00) // 98D8D8
-            case "dark": return UIColor(red: 0.44, green: 0.34, blue: 0.28, alpha: 1.00) // 705848
-            case "fairy": return UIColor(red: 0.93, green: 0.60, blue: 0.69, alpha: 1.00) // EE99AC
-            // Seus assets:
+            case "normal": return UIColor(named: "normal")
+            case "fighting": return UIColor(named: "fighting")
+            case "flying": return UIColor(named: "flying")
+            case "poison": return UIColor(named: "poison")
+            case "ground": return UIColor(named: "ground")
+            case "rock": return UIColor(named: "rock")
+            case "ghost": return UIColor(named: "ghost")
+            case "steel": return UIColor(named: "steel")
+            case "water": return UIColor(named: "water")
+            case "psychic": return UIColor(named: "psychic")
+            case "ice": return UIColor(named: "ice")
+            case "dark": return UIColor(named: "dark")
+            case "fairy": return UIColor(named: "fairy")
             case "bug": return UIColor(named: "bug") ?? .systemGreen
             case "dragon": return UIColor(named: "dragon") ?? .systemIndigo
             case "electric": return UIColor(named: "electric") ?? .systemYellow
             case "fire": return UIColor(named: "fire") ?? .systemRed
             case "grass": return UIColor(named: "grass") ?? .systemGreen
-            default: return UIColor.systemGray // Cor padrão para tipos não mapeados
+            default: return UIColor.systemGray
         }
     }
 }

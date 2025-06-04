@@ -63,22 +63,26 @@ class PokemonDetailViewController: UIViewController {
         let stack = UIStackView(arrangedSubviews: [nameLabel, idLabel])
         stack.axis = .vertical
         stack.alignment = .center
+        stack.spacing = 4
+        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
 
     private lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        label.font = UIFont.systemFont(ofSize: 20, weight: .medium)
         label.textColor = .white
         label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private lazy var idLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
         label.textColor = .white.withAlphaComponent(0.8)
         label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
@@ -174,7 +178,7 @@ class PokemonDetailViewController: UIViewController {
             headerBackgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             headerBackgroundView.heightAnchor.constraint(equalToConstant: headerHeight),
             
-            pokeballImageView.topAnchor.constraint(equalTo: headerBackgroundView.safeAreaLayoutGuide.topAnchor, constant: -16),
+            pokeballImageView.topAnchor.constraint(equalTo: headerBackgroundView.safeAreaLayoutGuide.topAnchor),
             pokeballImageView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -10),
             pokeballImageView.widthAnchor.constraint(equalTo: headerBackgroundView.widthAnchor, multiplier: 0.6),
             pokeballImageView.heightAnchor.constraint(equalTo: pokeballImageView.widthAnchor),
@@ -187,7 +191,7 @@ class PokemonDetailViewController: UIViewController {
             nameIdTypeStackView.topAnchor.constraint(equalTo: pokemonImageView.bottomAnchor, constant: 8),
             nameIdTypeStackView.leadingAnchor.constraint(equalTo: headerBackgroundView.leadingAnchor, constant: 20),
             nameIdTypeStackView.trailingAnchor.constraint(equalTo: headerBackgroundView.trailingAnchor, constant: -20),
-            nameIdTypeStackView.bottomAnchor.constraint(equalTo: headerBackgroundView.bottomAnchor, constant: -10),
+            nameIdTypeStackView.bottomAnchor.constraint(lessThanOrEqualTo: headerBackgroundView.bottomAnchor, constant: -10),
 
             activityIndicator.centerXAnchor.constraint(equalTo: headerBackgroundView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: headerBackgroundView.centerYAnchor),
@@ -269,7 +273,7 @@ class PokemonDetailViewController: UIViewController {
         viewModel.pokemonTypesText.bind { [weak self] typesText in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.typesPillStackView.arrangedSubviews.forEach { $0.removeFromSuperview() } // Limpa pílulas existentes
+                self.typesPillStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
                 
                 if let typesString = typesText, !typesString.isEmpty {
                     let typeNames = typesString.components(separatedBy: " / ")
@@ -326,17 +330,14 @@ class PokemonDetailViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.textColor = .white
         label.textAlignment = .center
-        label.layer.cornerRadius = 12 // Metade da altura esperada para um visual de pílula
+        label.layer.cornerRadius = 12
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Cor de fundo baseada no tipo (usando sua função existente)
         label.backgroundColor = viewModel.colorForType(typeName: typeName) ?? .systemGray
         
-        // Padding
         let padding: CGFloat = 8
         label.widthAnchor.constraint(greaterThanOrEqualToConstant: label.intrinsicContentSize.width + (padding * 2)).isActive = true
-        label.heightAnchor.constraint(equalToConstant: 24).isActive = true // Altura fixa para a pílula
+        label.heightAnchor.constraint(equalToConstant: 24).isActive = true
         
         return label
     }

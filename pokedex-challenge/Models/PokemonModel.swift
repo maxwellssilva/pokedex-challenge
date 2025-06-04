@@ -27,22 +27,15 @@ struct Sprites: Codable {
     }
 }
 
-// Em PokemonModel.swift
-
-// Mantenha PokemonListResponse e PokemonResult como estão.
-
-// MARK: - Pokemon Detail Model (para /pokemon/{id})
 struct PokemonDetail: Codable {
     let id: Int
     let name: String
-    let height: Int // Altura em decímetros
-    let weight: Int // Peso em hectogramas
+    let height: Int
+    let weight: Int
     let sprites: PokemonSprites
     let stats: [StatElement]
     let types: [TypeElement]
-    let species: APIResource // Link para buscar detalhes da espécie
-    // Adicione 'abilities' se quiser listar as habilidades também
-    // let abilities: [AbilityElement]
+    let species: APIResource
 }
 
 struct PokemonSprites: Codable {
@@ -73,7 +66,7 @@ struct OfficialArtwork: Codable {
 
 struct StatElement: Codable {
     let baseStat: Int
-    let stat: APIResource // Contém o nome do stat (e.g., "hp", "attack", "defense")
+    let stat: APIResource
 
     enum CodingKeys: String, CodingKey {
         case baseStat = "base_stat"
@@ -83,52 +76,25 @@ struct StatElement: Codable {
 
 struct TypeElement: Codable {
     let slot: Int
-    let type: APIResource // Contém o nome do tipo (e.g., "grass", "poison")
+    let type: APIResource
 }
 
-// struct AbilityElement: Codable {
-//     let ability: APIResource
-//     let isHidden: Bool
-//     let slot: Int
-//
-//     enum CodingKeys: String, CodingKey {
-//         case ability
-//         case isHidden = "is_hidden"
-//         case slot
-//     }
-// }
-
-struct APIResource: Codable { // Estrutura genérica para links da API
+struct APIResource: Codable {
     let name: String
     let url: String
 }
 
-
-// MARK: - Pokemon Species Detail Model (para /pokemon-species/{id})
 struct PokemonSpeciesDetail: Codable {
-    let color: APIResource? // Cor primária da espécie, pode ser usada como fallback
-    let genera: [Genus] // Contém a "categoria" em diferentes idiomas (ex: "Seed Pokémon")
+    let color: APIResource?
+    let genera: [Genus]
     let habitat: APIResource?
-    // Adicione 'flavor_text_entries' se quiser exibir a descrição da Pokédex
-    // let flavorTextEntries: [FlavorTextEntry]
-
+    
     enum CodingKeys: String, CodingKey {
-        case color, genera, habitat //, flavorTextEntries = "flavor_text_entries"
+        case color, genera, habitat
     }
 }
 
 struct Genus: Codable {
     let genus: String
-    let language: APIResource // Para filtrar pelo idioma (ex: "en")
+    let language: APIResource
 }
-
-// struct FlavorTextEntry: Codable {
-//     let flavorText: String
-//     let language: APIResource
-//
-//     enum CodingKeys: String, CodingKey {
-//         case flavorText = "flavor_text"
-//         case language
-//     }
-// }
-

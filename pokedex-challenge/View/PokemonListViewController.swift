@@ -139,7 +139,6 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedPokemon = viewModel.displayPokemons[indexPath.row]
-        // Extrai o ID do Pokémon da URL
         let idString = selectedPokemon.url.components(separatedBy: "/").dropLast().last ?? "1"
         guard let pokemonID = Int(idString) else {
             print("Erro ao extrair ID do Pokémon da URL: \(selectedPokemon.url)")
