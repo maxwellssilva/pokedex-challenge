@@ -22,7 +22,7 @@ class PokemonListViewController: UIViewController {
 
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Pesquise um pokémon"
+        searchBar.placeholder = "Pesquise um Pokémon"
         searchBar.searchBarStyle = .minimal
         searchBar.barTintColor = .systemBackground
         searchBar.delegate = self
@@ -49,6 +49,7 @@ class PokemonListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        title = "Pokédex"
         setupLayoutPokemonList()
         bindViewModel()
         viewModel.fetchPokemons()
@@ -138,7 +139,15 @@ extension PokemonListViewController: UITableViewDelegate, UITableViewDataSource 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedPokemon = viewModel.displayPokemons[indexPath.row]
-        print("Selecionado: \(selectedPokemon.name)")
+        let idString = selectedPokemon.url.components(separatedBy: "/").dropLast().last ?? "1"
+        guard let pokemonID = Int(idString) else {
+            print("Erro ao extrair ID do Pokémon da URL: \(selectedPokemon.url)")
+            return
+        }
+        
+        let detailViewModel = PokemonDetailViewModel(pokemon: selectedPokemon, id: pokemonID)
+        let detailViewController = PokemonDetailViewController(viewModel: detailViewModel)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
 }
 
