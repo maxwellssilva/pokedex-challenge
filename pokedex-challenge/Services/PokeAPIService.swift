@@ -7,19 +7,41 @@
 
 import Foundation
 
-enum APIError: Error {
+enum APIError: Error, Equatable {
     case invalidURL
     case requestFailed(Error)
     case invalidResponse
     case decodingFailed(Error)
     case unknown
+
+    static func == (lhs: APIError, rhs: APIError) -> Bool {
+        switch (lhs, rhs) {
+        case (.invalidURL, .invalidURL): return true
+        case (.invalidResponse, .invalidResponse): return true
+        case (.unknown, .unknown): return true
+        case (.requestFailed(_), .requestFailed(_)): return true
+        case (.decodingFailed(_), .decodingFailed(_)): return true
+        default: return false
+        }
+    }
 }
+
+protocol URLSessionProtocol {
+    func dataTask(with url: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask
+    func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask
+}
+
+extension URLSession: URLSessionProtocol {}
 
 class NetworkManager {
    
     static let shared = NetworkManager()
-
-    private init() {}
+    
+    private let session: URLSessionProtocol
+    
+    init(session: URLSessionProtocol = URLSession.shared) {
+        self.session = session
+    }
 
     func fetchData<T: Decodable>(endpoint: String, completion: @escaping (Result<T, APIError>) -> Void) {
         guard let url = URL(string: Constants.baseURL + endpoint) else {
